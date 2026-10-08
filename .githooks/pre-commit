@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Operator Desk pure-shell pre-commit
+# Enforces: secret grep, gofmt, go vet, go test, jq envelope checks
+# Zero Python dependency.
+
+set -euo pipefail
+
+echo "[operator-desk] pre-commit starting..."
+
+# 1. Conservative secret scan (local)
+SECRET_PATTERNS=(
+  'PQC_TEST_SEED[[:space:]]*='
+  'private[_-]?key'
+  '-----BEGIN.*(PRIVATE|RSA|EC|OPENSSH)'
+  'sk_live_'
+  'AKIA[0-9A-Z]{16}'
+)
+
+for pat in "${SECRET_PATTERNS[@]}"; do
+  if git diff --cached --name-only | xargs grep -E -n "$pat" 2>/dev/null; then
+    echo "ERROR: potential secret matched pattern: $pat"
+    echo "Remove secrets before committing."
+    exit 1
+  fi
+done
+
+# 2. gofmt
+if ! gofmt -l . | grep -q .; then
+  echo "[gofmt] clean"
+else
+  echo "ERROR: gofmt issues found. Run: gofmt -w ."
+  gofmt -l .
+  exit 1
+fi
+
+# 3. go vet
+echo "[go vet] running..."
+go vet ./...
+
+# 4. go test (short)
+echo "[go test] running..."
+go test ./... -count=1 -short
+
+# 5. jq validation on envelope JSON
+if command -v jq >/dev/null 2>&1; then
+  for f in vectors/eventv1/*_envelope.json; do
+    if [[ -f "$f" ]]; then
+      echo "[jq] validating $f"
+      jq empty "$f" || { echo "Invalid JSON: $f"; exit 1; }
+    fi
+  done
+else
+  echo "WARN: jq not found – skipping envelope JSON validation"
+fi
+
+echo "[operator-desk] pre-commit passed."

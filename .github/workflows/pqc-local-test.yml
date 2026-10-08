@@ -1,0 +1,26 @@
+name: PQC Local Test
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pqc-local:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: EventV1 Verify
+        uses: ./.github/actions/eventv1-verify
+        with:
+          seed: ${{ secrets.PQC_TEST_SEED }}
+          vector_dir: vectors/eventv1
+
+      - name: Upload vectors (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: eventv1-vectors
+          path: vectors/eventv1/
+          retention-days: 7

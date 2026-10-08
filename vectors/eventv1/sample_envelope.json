@@ -1,0 +1,16 @@
+{
+  "version": "eventv1",
+  "type": "sample",
+  "payload": {
+    "message": "Operator Desk sample envelope – replace with real vectors",
+    "timestamp": "2026-10-08T00:00:00Z"
+  },
+  "signature": {
+    "alg": "PQC-PLACEHOLDER",
+    "value": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "meta": {
+    "generated_by": "operator-desk-scaffold",
+    "seed_used": "test-only"
+  }
+}

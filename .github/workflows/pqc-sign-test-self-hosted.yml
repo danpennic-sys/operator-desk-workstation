@@ -1,0 +1,35 @@
+name: PQC Sign Test (Self-Hosted + Signing)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'tools/**'
+      - 'vectors/**'
+
+jobs:
+  sign-hsm:
+    runs-on: [self-hosted, signing, linux]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check host signer public key
+        run: |
+          if [ ! -f /etc/host-signer/pubkey.hex ]; then
+            echo "ERROR: /etc/host-signer/pubkey.hex not found on signer host"
+            exit 1
+          fi
+          echo "Public key present:"
+          head -c 64 /etc/host-signer/pubkey.hex
+          echo "..."
+
+      - name: EventV1 Verify + Sign path
+        uses: ./.github/actions/eventv1-verify
+        with:
+          seed: ${{ secrets.PQC_TEST_SEED }}
+
+      - name: Operator note
+        run: |
+          echo "Self-hosted signing path executed."
+          echo "See docs/gate001/OPS_SIGNER_RUNBOOK.md for production steps."

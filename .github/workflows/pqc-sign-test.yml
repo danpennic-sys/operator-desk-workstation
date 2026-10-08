@@ -1,0 +1,25 @@
+name: PQC Sign Test (Hosted)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'tools/**'
+      - 'vectors/**'
+      - '.github/actions/**'
+
+jobs:
+  sign-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: EventV1 Verify (no HSM)
+        uses: ./.github/actions/eventv1-verify
+        with:
+          seed: ${{ secrets.PQC_TEST_SEED }}
+
+      - name: Note
+        run: |
+          echo "This workflow runs on hosted runners (no HSM)."
+          echo "For real signing use pqc-sign-test-self-hosted.yml"
