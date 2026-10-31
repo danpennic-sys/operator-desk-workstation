@@ -31,7 +31,7 @@ go build -o bin/eventv1-verify ./tools/eventv1/ 2>/dev/null || echo "  (build sk
 
 echo "[4/4] Verify..."
 if [[ -x bin/eventv1-verify ]]; then
-  ./bin/eventv1-verify --vector vectors/eventv1/
+  ./bin/eventv1-verify verify -vector vectors/eventv1/
 else
   echo "  Running go test as verification stand-in..."
   go test ./... -count=1 -short

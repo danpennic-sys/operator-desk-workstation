@@ -24,14 +24,10 @@ for pat in "${SECRET_PATTERNS[@]}"; do
   fi
 done
 
-# 2. gofmt
-if ! gofmt -l . | grep -q .; then
-  echo "[gofmt] clean"
-else
-  echo "ERROR: gofmt issues found. Run: gofmt -w ."
-  gofmt -l .
-  exit 1
-fi
+# 2. gofmt — fail closed via scripts/gofmt-check.sh
+echo "[gofmt] running..."
+repo_root="$(git rev-parse --show-toplevel)"
+"$repo_root/scripts/gofmt-check.sh" "$repo_root"
 
 # 3. go vet
 echo "[go vet] running..."

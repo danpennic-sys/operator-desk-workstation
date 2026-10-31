@@ -52,7 +52,7 @@ runs:
         echo "[eventv1-verify] verify stage"
         go test ./... -count=1 -short
         if [ -x bin/eventv1-verify ]; then
-          ./bin/eventv1-verify --vector ${{ inputs.vector_dir }}
+          ./bin/eventv1-verify verify -vector ${{ inputs.vector_dir }}
         fi
 
     - name: jq envelope check
