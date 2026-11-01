@@ -18,7 +18,7 @@ runs:
     - name: Setup Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.22'
+        go-version: '1.26'
 
     - name: Set test seed
       shell: bash
@@ -37,8 +37,6 @@ runs:
       run: |
         echo "[eventv1-verify] generate / convert stage"
         mkdir -p ${{ inputs.vector_dir }}
-        # Real generator call goes here
-        # go run ./tools/eventv1 generate --out ${{ inputs.vector_dir }}
 
     - name: Build
       shell: bash

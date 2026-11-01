@@ -1,6 +1,6 @@
 module github.com/operatorpages/operator-desk
 
-go 1.22
+go 1.26
 
 // Operator Desk – EventV1 + PQC workstation
-// Pin to 1.21–1.22 range per stack standard.
+// Aligned with Operator Pages stack standard (Go 1.26).

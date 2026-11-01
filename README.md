@@ -26,7 +26,7 @@ export PQC_TEST_SEED="0000000000000000000000000000000000000000000000000000000000
 
 | Layer              | Component                                      | Status in this desk |
 |--------------------|------------------------------------------------|---------------------|
-| Language           | Go 1.21–1.22                                   | go.mod pinned       |
+| Language           | **Go 1.26** (Operator Pages stack standard)    | go.mod pinned       |
 | Format / Lint      | gofmt + go vet + go test                       | pre-commit enforced |
 | Optional deep lint | golangci-lint                                  | documented          |
 | CI                 | GitHub Actions (ubuntu-latest + self-hosted)   | workflows included  |
@@ -41,25 +41,21 @@ export PQC_TEST_SEED="0000000000000000000000000000000000000000000000000000000000
 
 ```
 operator-desk/
-├── README.md                          ← you are here
+├── README.md
 ├── go.mod
-├── bin/                               ← built binaries land here
+├── bin/
 ├── tools/
-│   ├── eventv1/                       ← generator, envelope maker, verify CLI
-│   └── pqc-harness/                   ← PQC test harness
-├── vectors/eventv1/                   ← golden envelopes
+│   ├── eventv1/
+│   └── pqc-harness/
+├── vectors/eventv1/
 ├── .github/
-│   ├── actions/eventv1-verify/        ← composite action
-│   └── workflows/                     ← pqc-local-test, pqc-sign-test, etc.
-├── .githooks/pre-commit               ← pure-shell enforcement
+│   ├── actions/eventv1-verify/
+│   └── workflows/
+├── .githooks/pre-commit
 ├── scripts/
 │   ├── setup-hooks.sh
 │   └── run-eventv1-verify.sh
 └── docs/gate001/
-    ├── PR_BODY.md
-    ├── REVIEWER_CHECKLIST.md
-    ├── OPS_SIGNER_RUNBOOK.md
-    └── PR_REVIEW_CHECKLIST.md
 ```
 
 ## Operator Workflows
@@ -84,9 +80,9 @@ See `docs/gate001/OPS_SIGNER_RUNBOOK.md`. Public key expected at `/etc/host-sign
 - Recommended CI: gitleaks or trufflehog.
 
 ## Next Big Thing Watch
-This desk is Go-primary. Node.js / Python adjacency points are noted in `docs/gate001/` for future seat expansion (CLI wrappers, dashboard, automation agents).
+This desk is Go-primary. Node.js 26+ / Python 3.12+ adjacency points are noted in `docs/gate001/` for future seat expansion.
 
 ---
 
 **Proof sells. Sell seats.**  
-Operator Desk v0.1 – ready for internal distribution.
+Operator Desk – Go 1.26 stack-synced.

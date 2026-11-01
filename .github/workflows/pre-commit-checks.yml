@@ -12,14 +12,13 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: "1.26"
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Run pure-shell pre-commit logic
         run: |
-          # Replicate the local .githooks/pre-commit checks
           set -euo pipefail
           gofmt -l . | tee /tmp/gofmt.out
           if [ -s /tmp/gofmt.out ]; then
