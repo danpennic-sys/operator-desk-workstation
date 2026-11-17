@@ -1,0 +1,8 @@
+title = "operator-desk-workstation"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Documented all-zero test placeholder. Not a production key. Do not add real seeds here."
+regexes = ['''0{64}''']
