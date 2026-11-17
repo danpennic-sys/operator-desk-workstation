@@ -41,16 +41,7 @@ go vet ./...
 echo "[go test] running..."
 go test ./... -count=1 -short
 
-# 5. jq validation on envelope JSON
-if command -v jq >/dev/null 2>&1; then
-  for f in vectors/eventv1/*_envelope.json; do
-    if [[ -f "$f" ]]; then
-      echo "[jq] validating $f"
-      jq empty "$f" || { echo "Invalid JSON: $f"; exit 1; }
-    fi
-  done
-else
-  echo "WARN: jq not found – skipping envelope JSON validation"
-fi
+# 5. jq validation on envelope JSON (same script as CI)
+bash scripts/check-envelopes.sh
 
 echo "[operator-desk] pre-commit passed."

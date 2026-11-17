@@ -1,5 +1,5 @@
 // Package main – EventV1 CLI scaffold for Operator Desk
-// Primary language: Go 1.21–1.22
+// Go pin: 1.26 (go.mod). verify does not check a signature.
 // Commands: generate | envelope | verify
 package main
 

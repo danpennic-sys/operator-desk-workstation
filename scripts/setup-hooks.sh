@@ -14,4 +14,5 @@ git config core.hooksPath "$HOOKS_DIR"
 chmod +x "$HOOKS_DIR/pre-commit"
 
 echo "Hooks installed. core.hooksPath = $HOOKS_DIR"
+echo "Pure shell only. Do not add .pre-commit-config.yaml unless that rule is retired in writing."
 echo "Run a test commit to verify."

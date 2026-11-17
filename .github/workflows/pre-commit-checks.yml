@@ -18,6 +18,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Run pure-shell pre-commit logic
+        env:
+          REQUIRE_JQ: "1"
         run: |
           set -euo pipefail
           gofmt -l . | tee /tmp/gofmt.out
@@ -27,7 +29,17 @@ jobs:
           fi
           go vet ./...
           go test ./... -count=1 -short
-          for f in vectors/eventv1/*_envelope.json; do
-            [ -f "$f" ] && jq empty "$f"
-          done
+          bash scripts/check-envelopes.sh
           echo "Pre-commit checks passed"
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

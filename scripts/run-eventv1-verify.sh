@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Operator Desk – local EventV1 generate → convert → build → verify pipeline
 # Mirrors the composite action .github/actions/eventv1-verify
+# The verify binary is a scaffold. A pass here is not a signature check.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -27,15 +28,17 @@ echo "[2/4] Convert / envelope..."
 # Placeholder for envelope maker
 
 echo "[3/4] Build tools..."
-go build -o bin/eventv1-verify ./tools/eventv1/ 2>/dev/null || echo "  (build skipped – tool still scaffold)"
+go build -o bin/eventv1-verify ./tools/eventv1/
 
 echo "[4/4] Verify..."
 if [[ -x bin/eventv1-verify ]]; then
-  ./bin/eventv1-verify --vector vectors/eventv1/
+  ./bin/eventv1-verify verify --vector vectors/eventv1/
 else
   echo "  Running go test as verification stand-in..."
   go test ./... -count=1 -short
 fi
 
-echo "=== Pipeline complete ==="
+bash scripts/check-envelopes.sh vectors/eventv1
+
+echo "=== Pipeline complete (scaffold — not a signature check) ==="
 echo "Inspect: vectors/eventv1/"

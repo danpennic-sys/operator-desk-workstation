@@ -36,28 +36,24 @@ runs:
       shell: bash
       run: |
         echo "[eventv1-verify] generate / convert stage"
-        mkdir -p ${{ inputs.vector_dir }}
+        mkdir -p "${{ inputs.vector_dir }}"
 
     - name: Build
       shell: bash
       run: |
         echo "[eventv1-verify] build stage"
-        go build -o bin/eventv1-verify ./tools/eventv1/ || true
+        go build -o bin/eventv1-verify ./tools/eventv1/
 
     - name: Verify
       shell: bash
       run: |
-        echo "[eventv1-verify] verify stage"
+        echo "[eventv1-verify] verify stage (scaffold — not a signature check)"
         go test ./... -count=1 -short
         if [ -x bin/eventv1-verify ]; then
-          ./bin/eventv1-verify --vector ${{ inputs.vector_dir }}
+          ./bin/eventv1-verify verify --vector "${{ inputs.vector_dir }}"
         fi
 
     - name: jq envelope check
       shell: bash
       run: |
-        if command -v jq >/dev/null; then
-          for f in ${{ inputs.vector_dir }}/*_envelope.json; do
-            [ -f "$f" ] && jq empty "$f"
-          done
-        fi
+        bash scripts/check-envelopes.sh "${{ inputs.vector_dir }}"
