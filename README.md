@@ -6,6 +6,8 @@ CEO / Founder: Daniel H. Pennick
 Local operator workstation package for EventV1 + PQC signing / verification pipelines.  
 Built for speed-to-proof. Reuses existing stack pieces. MVP-ready.
 
+This tree is a scaffold. `tools/eventv1 verify` does not check a signature. See `docs/CONTRIBUTING.md`.
+
 ## Quick Start (MVP in minutes)
 
 ```bash
@@ -54,8 +56,12 @@ operator-desk/
 ├── .githooks/pre-commit
 ├── scripts/
 │   ├── setup-hooks.sh
+│   ├── check-envelopes.sh
 │   └── run-eventv1-verify.sh
-└── docs/gate001/
+└── docs/
+    ├── CONTRIBUTING.md
+    ├── ships/
+    └── gate001/
 ```
 
 ## Operator Workflows
@@ -69,20 +75,27 @@ operator-desk/
 ### CI proof
 - Push → `pqc-local-test.yml` runs on ubuntu-latest
 - Signing path → `pqc-sign-test-self-hosted.yml` (requires self-hosted runner labeled `signing`)
+- Hosted secret scan → gitleaks in `pre-commit-checks.yml` (ubuntu-latest only)
 
 ### Production signing
 See `docs/gate001/OPS_SIGNER_RUNBOOK.md`. Public key expected at `/etc/host-signer/pubkey.hex` on the signer host.
 
+## What this repo does not verify
+
+`tools/eventv1 verify` prints a pass. `go test` here is a smoke stub. Neither is a QuantumGuard verification.
+
+The frozen verifier is `danpennic-sys/quantumguard`. Do not reimplement it under `web/` in this repo. A Node seat may show an artifact this pipeline produced. It does not become the verifier.
+
 ## Secrets Policy
 - **Never** commit real seeds or private keys.
-- `PQC_TEST_SEED` is for deterministic test vectors only.
+- `PQC_TEST_SEED` is for deterministic test vectors only. The all-zero hex above is a placeholder. Do not replace it in git with a real seed.
 - Local secret scan is conservative grep in pre-commit.
-- Recommended CI: gitleaks or trufflehog.
+- Hosted CI runs gitleaks on ubuntu-latest. Do not put that scanner on the signing runner.
 
 ## Next Big Thing Watch
-This desk is Go-primary. Node.js 26+ / Python 3.12+ adjacency points are noted in `docs/gate001/` for future seat expansion.
+This desk is Go-primary. Node.js may sell a seat on an artifact. Python stays off the hook path and off the signer. No retarget of the primary language in this change.
 
 ---
 
 **Proof sells. Sell seats.**  
-Operator Desk – Go 1.26 stack-synced.
+Operator Desk – Go 1.26 stack-synced. Scaffold is not the verifier.
