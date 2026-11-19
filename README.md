@@ -27,10 +27,10 @@ The script builds `bin/eventv1-verify` (gitignored) and requires all three resul
 
 - `tools/pqc-harness/` is a note, not a harness. No ML-DSA.
 - `envelope` is not implemented. It exits 2.
-- Workflow filenames still say `pqc-`. The jobs do not perform post-quantum verification and do not HSM-sign.
 - A file at `/etc/host-signer/pubkey.hex` proves the file exists. It does not prove a signature.
 - This repository is public. Do not put a private key in it.
 - `docs/gate001/` runbooks are not a second verifier.
+- Repository description still says "Private." and "Go 1.22". The repo is public and `go.mod` pins 1.26. That is a settings change, not a file.
 
 ## Layout
 
@@ -39,6 +39,7 @@ tools/eventv1/          verify and generate
 vectors/eventv1/        three fixtures
 scripts/run-eventv1-verify.sh
 .github/actions/eventv1-verify/
+.github/workflows/      eventv1-*.yml
 docs/CONTRIBUTING.md
 docs/gate001/
 ```
