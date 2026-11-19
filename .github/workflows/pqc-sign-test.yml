@@ -1,4 +1,5 @@
-name: PQC Sign Test (Hosted)
+# Filename is historical. Hosted runners do not HSM-sign. This is the same ed25519-test proof.
+name: EventV1 hosted proof (no HSM)
 
 on:
   workflow_dispatch:
@@ -9,17 +10,15 @@ on:
       - '.github/actions/**'
 
 jobs:
-  sign-test:
+  hosted-proof:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: EventV1 Verify (no HSM)
         uses: ./.github/actions/eventv1-verify
-        with:
-          seed: ${{ secrets.PQC_TEST_SEED }}
 
       - name: Note
         run: |
-          echo "This workflow runs on hosted runners (no HSM)."
-          echo "For real signing use pqc-sign-test-self-hosted.yml"
+          echo "Hosted runner. No HSM. No post-quantum verification."
+          echo "Self-hosted workflow does not sign either unless a separate signer is added."

@@ -1,41 +1,53 @@
 #!/usr/bin/env bash
-# Operator Desk – local EventV1 generate → convert → build → verify pipeline
-# Mirrors the composite action .github/actions/eventv1-verify
+# Desk proof. Three committed fixtures. Not qg verify. Not post-quantum.
+# Verify uses the public key inside each file. PQC_TEST_SEED is not read.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-echo "=== Operator Desk EventV1 Verify Pipeline ==="
+echo "=== EventV1 desk proof: ed25519-test, not QuantumGuard, not PQC ==="
 
-# Ensure test seed is present (deterministic only)
-if [[ -z "${PQC_TEST_SEED:-}" ]]; then
-  echo "WARN: PQC_TEST_SEED not set. Using zero seed for local dry-run."
-  export PQC_TEST_SEED="0000000000000000000000000000000000000000000000000000000000000000"
-fi
+mkdir -p bin
+go build -o bin/eventv1-verify ./tools/eventv1/
 
-echo "[1/4] Generate / prepare vectors..."
-mkdir -p vectors/eventv1
-# Placeholder: real generator lives in tools/eventv1
-if [[ -f tools/eventv1/generate.go ]]; then
-  go run ./tools/eventv1 generate --out vectors/eventv1/
-else
-  echo "  (scaffold mode – using existing sample vector)"
-fi
+expect() {
+  local want="$1" file="$2" out rc first
+  set +e
+  out="$(./bin/eventv1-verify verify --vector "$file")"
+  rc=$?
+  set -e
+  printf '%s\n' "$out"
+  first="${out%%$'\n'*}"
+  case "$want" in
+    PASS)
+      [ "$rc" -eq 0 ] || { echo "expected PASS exit 0, got $rc"; exit 1; }
+      ;;
+    FAIL)
+      [ "$rc" -eq 1 ] || { echo "expected FAIL exit 1, got $rc"; exit 1; }
+      ;;
+    INDETERMINATE)
+      [ "$rc" -eq 2 ] || { echo "expected INDETERMINATE exit 2, got $rc"; exit 1; }
+      ;;
+    *)
+      echo "unknown expected verdict $want"
+      exit 1
+      ;;
+  esac
+  case "$first" in
+    "$want"*) ;;
+    *)
+      echo "expected first line to start with $want"
+      exit 1
+      ;;
+  esac
+}
 
-echo "[2/4] Convert / envelope..."
-# Placeholder for envelope maker
+expect PASS vectors/eventv1/good_ed25519_envelope.json
+expect FAIL vectors/eventv1/bad_ed25519_envelope.json
+expect INDETERMINATE vectors/eventv1/sample_envelope.json
 
-echo "[3/4] Build tools..."
-go build -o bin/eventv1-verify ./tools/eventv1/ 2>/dev/null || echo "  (build skipped – tool still scaffold)"
+echo "[go test]"
+go test ./... -count=1
 
-echo "[4/4] Verify..."
-if [[ -x bin/eventv1-verify ]]; then
-  ./bin/eventv1-verify --vector vectors/eventv1/
-else
-  echo "  Running go test as verification stand-in..."
-  go test ./... -count=1 -short
-fi
-
-echo "=== Pipeline complete ==="
-echo "Inspect: vectors/eventv1/"
+echo "=== PASS, FAIL, and INDETERMINATE each observed once ==="
