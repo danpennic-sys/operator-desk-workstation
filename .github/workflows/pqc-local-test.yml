@@ -1,4 +1,5 @@
-name: PQC Local Test
+# Filename is historical. This job is ed25519-test, not post-quantum.
+name: EventV1 local proof
 
 on:
   push:
@@ -7,16 +8,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  pqc-local:
+  eventv1-proof:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: EventV1 Verify
         uses: ./.github/actions/eventv1-verify
-        with:
-          seed: ${{ secrets.PQC_TEST_SEED }}
-          vector_dir: vectors/eventv1
 
       - name: Upload vectors (artifact)
         uses: actions/upload-artifact@v4

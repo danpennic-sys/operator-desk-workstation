@@ -1,9 +1,8 @@
-# PQC Harness
+# PQC harness
 
-Placeholder for the PQC test harness used by Operator Desk.
+This directory is not a harness.
 
-- Deterministic runs driven by `PQC_TEST_SEED` (32-byte hex)
-- Integrates with EventV1 vectors
-- Self-hosted signing path lives in `docs/gate001/OPS_SIGNER_RUNBOOK.md`
+There is no ML-DSA code here. There is no post-quantum verification here.
+`rust/qg-mldsa65` in the QuantumGuard repo is a different tree and is not wired to `qg`.
 
-Expand this directory with real harness code when the next proof cycle starts.
+The desk proof lives in `tools/eventv1` and uses `ed25519-test` only.

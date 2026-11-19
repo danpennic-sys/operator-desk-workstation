@@ -1,14 +1,14 @@
 name: 'EventV1 Verify'
-description: 'Operator Desk composite action: generate → convert → build → verify'
-author: 'Operator Pages LLC / Quantomguard AI'
+description: 'Build the desk tool and require PASS, FAIL, and INDETERMINATE on committed ed25519-test fixtures. Not QuantumGuard. Not post-quantum.'
+author: 'Operator Pages LLC'
 
 inputs:
   seed:
-    description: 'PQC_TEST_SEED (32-byte hex) – test only'
+    description: 'Ignored. Verify reads the public key in the fixture. This is not a PQC seed.'
     required: false
     default: ''
   vector_dir:
-    description: 'Directory containing EventV1 envelopes'
+    description: 'Ignored. The proof uses the three committed fixtures.'
     required: false
     default: 'vectors/eventv1'
 
@@ -20,44 +20,15 @@ runs:
       with:
         go-version: '1.26'
 
-    - name: Set test seed
+    - name: Prove three verdicts
       shell: bash
-      run: |
-        if [ -n "${{ inputs.seed }}" ]; then
-          echo "PQC_TEST_SEED=${{ inputs.seed }}" >> $GITHUB_ENV
-        elif [ -n "${{ secrets.PQC_TEST_SEED }}" ]; then
-          echo "PQC_TEST_SEED=${{ secrets.PQC_TEST_SEED }}" >> $GITHUB_ENV
-        else
-          echo "WARN: No PQC_TEST_SEED provided – using zero seed"
-          echo "PQC_TEST_SEED=0000000000000000000000000000000000000000000000000000000000000000" >> $GITHUB_ENV
-        fi
-
-    - name: Generate / Convert
-      shell: bash
-      run: |
-        echo "[eventv1-verify] generate / convert stage"
-        mkdir -p ${{ inputs.vector_dir }}
-
-    - name: Build
-      shell: bash
-      run: |
-        echo "[eventv1-verify] build stage"
-        go build -o bin/eventv1-verify ./tools/eventv1/ || true
-
-    - name: Verify
-      shell: bash
-      run: |
-        echo "[eventv1-verify] verify stage"
-        go test ./... -count=1 -short
-        if [ -x bin/eventv1-verify ]; then
-          ./bin/eventv1-verify --vector ${{ inputs.vector_dir }}
-        fi
+      run: bash scripts/run-eventv1-verify.sh
 
     - name: jq envelope check
       shell: bash
       run: |
         if command -v jq >/dev/null; then
-          for f in ${{ inputs.vector_dir }}/*_envelope.json; do
+          for f in vectors/eventv1/*_envelope.json; do
             [ -f "$f" ] && jq empty "$f"
           done
         fi

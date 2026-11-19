@@ -1,4 +1,5 @@
-name: PQC Sign Test (Self-Hosted + Signing)
+# Filename is historical. Checking that a pubkey file exists is not a signature.
+name: EventV1 self-hosted pubkey presence
 
 on:
   workflow_dispatch:
@@ -20,16 +21,15 @@ jobs:
             echo "ERROR: /etc/host-signer/pubkey.hex not found on signer host"
             exit 1
           fi
-          echo "Public key present:"
+          echo "Public key file is present. Presence is not a signature and is not a verdict."
           head -c 64 /etc/host-signer/pubkey.hex
-          echo "..."
+          echo
 
-      - name: EventV1 Verify + Sign path
+      - name: EventV1 ed25519-test proof
         uses: ./.github/actions/eventv1-verify
-        with:
-          seed: ${{ secrets.PQC_TEST_SEED }}
 
       - name: Operator note
         run: |
-          echo "Self-hosted signing path executed."
-          echo "See docs/gate001/OPS_SIGNER_RUNBOOK.md for production steps."
+          echo "This job did not HSM-sign an envelope."
+          echo "eventv1 verify checked the committed ed25519-test fixtures only."
+          echo "See docs/gate001/OPS_SIGNER_RUNBOOK.md before any production signing claim."

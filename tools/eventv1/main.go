@@ -1,52 +1,87 @@
-// Package main – EventV1 CLI scaffold for Operator Desk
-// Primary language: Go 1.21–1.22
-// Commands: generate | envelope | verify
+// Command eventv1 is the Operator Desk fixture tool.
+// verify prints one of PASS, FAIL, INDETERMINATE.
+// It is not qg verify. The algorithm is ed25519-test, not post-quantum.
 package main
 
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("eventv1 – Operator Desk CLI")
-		fmt.Println("Usage: eventv1 <generate|envelope|verify> [flags]")
-		os.Exit(1)
+	args := os.Args[1:]
+	cmd := "verify"
+	if len(args) > 0 && args[0] != "" && args[0][0] != '-' {
+		cmd = args[0]
+		args = args[1:]
 	}
-
-	cmd := os.Args[1]
 	switch cmd {
-	case "generate":
-		generateCmd(os.Args[2:])
-	case "envelope":
-		envelopeCmd(os.Args[2:])
 	case "verify":
-		verifyCmd(os.Args[2:])
+		os.Exit(verifyCmd(args))
+	case "generate":
+		os.Exit(generateCmd(args))
+	case "envelope":
+		fmt.Fprintln(os.Stderr, "eventv1: envelope is not a verifier and is not implemented")
+		os.Exit(2)
 	default:
-		fmt.Fprintf(os.Stderr, "unknown command: %s\n", cmd)
-		os.Exit(1)
+		fmt.Fprintf(os.Stderr, "eventv1: unknown command %q\n", cmd)
+		os.Exit(2)
 	}
 }
 
-func generateCmd(args []string) {
-	fs := flag.NewFlagSet("generate", flag.ExitOnError)
-	out := fs.String("out", "vectors/eventv1/", "output directory")
-	_ = fs.Parse(args)
-	fmt.Printf("[generate] writing sample vectors to %s\n", *out)
-	// Real implementation replaces this scaffold
+func verifyCmd(args []string) int {
+	fs := flag.NewFlagSet("verify", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+	vector := fs.String("vector", "", "envelope file or directory")
+	if err := fs.Parse(args); err != nil || *vector == "" {
+		fmt.Fprintln(os.Stderr, "usage: eventv1 verify --vector <file|dir>")
+		return 2
+	}
+	fmt.Fprintln(os.Stderr, "eventv1: ed25519-test desk verdict. not qg. not post-quantum.")
+	code, lines := verifyPaths(*vector)
+	for _, line := range lines {
+		fmt.Println(line)
+	}
+	return code
 }
 
-func envelopeCmd(args []string) {
-	fs := flag.NewFlagSet("envelope", flag.ExitOnError)
-	_ = fs.Parse(args)
-	fmt.Println("[envelope] building EventV1 envelope (scaffold)")
-}
-
-func verifyCmd(args []string) {
-	fs := flag.NewFlagSet("verify", flag.ExitOnError)
-	vector := fs.String("vector", "vectors/eventv1/", "vector path")
-	_ = fs.Parse(args)
-	fmt.Printf("[verify] verifying %s (scaffold – always pass for now)\n", *vector)
+func generateCmd(args []string) int {
+	fs := flag.NewFlagSet("generate", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+	out := fs.String("out", "vectors/eventv1", "output directory")
+	if err := fs.Parse(args); err != nil {
+		fmt.Fprintln(os.Stderr, "usage: eventv1 generate --out <dir>")
+		return 2
+	}
+	seed, err := seedFromEnv()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "eventv1:", err)
+		return 2
+	}
+	good, bad, err := goodAndBad(seed)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "eventv1:", err)
+		return 2
+	}
+	if err := os.MkdirAll(*out, 0o755); err != nil {
+		fmt.Fprintln(os.Stderr, "eventv1:", err)
+		return 2
+	}
+	goodPath := filepath.Join(*out, "good_ed25519_envelope.json")
+	badPath := filepath.Join(*out, "bad_ed25519_envelope.json")
+	if err := os.WriteFile(goodPath, good, 0o644); err != nil {
+		fmt.Fprintln(os.Stderr, "eventv1:", err)
+		return 2
+	}
+	if err := os.WriteFile(badPath, bad, 0o644); err != nil {
+		fmt.Fprintln(os.Stderr, "eventv1:", err)
+		return 2
+	}
+	fmt.Printf("wrote %s\n", goodPath)
+	fmt.Printf("wrote %s\n", badPath)
+	fmt.Fprintln(os.Stderr, "eventv1: ed25519-test fixtures. not post-quantum. not qg verify.")
+	return 0
 }

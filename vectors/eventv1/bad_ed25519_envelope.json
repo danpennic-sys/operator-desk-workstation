@@ -1,0 +1,12 @@
+{
+  "version": "eventv1",
+  "type": "fixture",
+  "payload": {
+    "message": "operator-desk ed25519-test fixture. not quantumguard. not post-quantum."
+  },
+  "signature": {
+    "alg": "ed25519-test",
+    "public_key": "3b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29",
+    "value": "b2efdd1a17ff4fb1977311b95f1cc04942d52d7a4364456f0c25e2716245fb6a7e3a96aa23803daacafe7d4613bc843029336f04c0c85e802cf58282dd6fc509"
+  }
+}

@@ -1,88 +1,50 @@
 # Operator Desk
 
-**Operator Pages LLC · Quantomguard AI**  
-CEO / Founder: Daniel H. Pennick
+Operator Pages LLC. Local EventV1 desk.
 
-Local operator workstation package for EventV1 + PQC signing / verification pipelines.  
-Built for speed-to-proof. Reuses existing stack pieces. MVP-ready.
+This is a scaffold that can now fail. It is not QuantumGuard. It is not `qg verify`. It is not post-quantum. It is not a seat.
 
-## Quick Start (MVP in minutes)
+## Proof
+
+Committed fixtures, algorithm `ed25519-test`:
+
+| File | Required result | Exit |
+|---|---|---|
+| `vectors/eventv1/good_ed25519_envelope.json` | PASS | 0 |
+| `vectors/eventv1/bad_ed25519_envelope.json` | FAIL | 1 |
+| `vectors/eventv1/sample_envelope.json` | INDETERMINATE | 2 |
 
 ```bash
-# 1. Unpack
-unzip operator-desk.zip && cd operator-desk
-
-# 2. Install local hooks (zero Python dependency)
 ./scripts/setup-hooks.sh
-
-# 3. Set test seed (repo secret style – never commit real values)
-export PQC_TEST_SEED="0000000000000000000000000000000000000000000000000000000000000000"  # 32-byte hex example
-
-# 4. Run local verification pipeline
-./scripts/run-eventv1-verify.sh
+bash scripts/run-eventv1-verify.sh
 ```
 
-## Stack Alignment (exact inventory)
+The script builds `bin/eventv1-verify` (gitignored) and requires all three results. `PQC_TEST_SEED` is not read during verify. The public key is inside the fixture. The committed key is the documented 32-byte zero seed.
 
-| Layer              | Component                                      | Status in this desk |
-|--------------------|------------------------------------------------|---------------------|
-| Language           | **Go 1.26** (Operator Pages stack standard)    | go.mod pinned       |
-| Format / Lint      | gofmt + go vet + go test                       | pre-commit enforced |
-| Optional deep lint | golangci-lint                                  | documented          |
-| CI                 | GitHub Actions (ubuntu-latest + self-hosted)   | workflows included  |
-| Composite action   | .github/actions/eventv1-verify                 | present             |
-| Tools              | tools/eventv1 + tools/pqc-harness              | scaffolded          |
-| Vectors            | vectors/eventv1/*_envelope.json                | sample included     |
-| Hooks              | .githooks/pre-commit (pure shell)              | active              |
-| Secrets            | PQC_TEST_SEED (test only)                      | documented          |
-| Signing            | HSM / host-signer on self-hosted runner        | runbook included    |
+`eventv1 generate --out vectors/eventv1` rewrites the good and bad fixtures. If `PQC_TEST_SEED` is set to anything other than 64 hex zeros, the rewrite will not match the committed files. Do not run generate in CI.
 
-## Directory Map
+## What is not true yet
+
+- `tools/pqc-harness/` is a note, not a harness. No ML-DSA.
+- `envelope` is not implemented. It exits 2.
+- Workflow filenames still say `pqc-`. The jobs do not perform post-quantum verification and do not HSM-sign.
+- A file at `/etc/host-signer/pubkey.hex` proves the file exists. It does not prove a signature.
+- This repository is public. Do not put a private key in it.
+- `docs/gate001/` runbooks are not a second verifier.
+
+## Layout
 
 ```
-operator-desk/
-├── README.md
-├── go.mod
-├── bin/
-├── tools/
-│   ├── eventv1/
-│   └── pqc-harness/
-├── vectors/eventv1/
-├── .github/
-│   ├── actions/eventv1-verify/
-│   └── workflows/
-├── .githooks/pre-commit
-├── scripts/
-│   ├── setup-hooks.sh
-│   └── run-eventv1-verify.sh
-└── docs/gate001/
+tools/eventv1/          verify and generate
+vectors/eventv1/        three fixtures
+scripts/run-eventv1-verify.sh
+.github/actions/eventv1-verify/
+docs/CONTRIBUTING.md
+docs/gate001/
 ```
 
-## Operator Workflows
+## Stack that this tree actually pins
 
-### Local proof loop
-1. Edit / generate envelope
-2. `go test ./...` (or let pre-commit run it)
-3. `./scripts/run-eventv1-verify.sh`
-4. Inspect vectors/eventv1/
+Go 1.26 (`go.mod`). gofmt, `go vet`, `go test` via `.githooks/pre-commit`. GitHub Actions on `ubuntu-latest`. The self-hosted workflow only checks that a pubkey file exists, then runs the same ed25519-test proof.
 
-### CI proof
-- Push → `pqc-local-test.yml` runs on ubuntu-latest
-- Signing path → `pqc-sign-test-self-hosted.yml` (requires self-hosted runner labeled `signing`)
-
-### Production signing
-See `docs/gate001/OPS_SIGNER_RUNBOOK.md`. Public key expected at `/etc/host-signer/pubkey.hex` on the signer host.
-
-## Secrets Policy
-- **Never** commit real seeds or private keys.
-- `PQC_TEST_SEED` is for deterministic test vectors only.
-- Local secret scan is conservative grep in pre-commit.
-- Recommended CI: gitleaks or trufflehog.
-
-## Next Big Thing Watch
-This desk is Go-primary. Node.js 26+ / Python 3.12+ adjacency points are noted in `docs/gate001/` for future seat expansion.
-
----
-
-**Proof sells. Sell seats.**  
-Operator Desk – Go 1.26 stack-synced.
+QuantumGuard v1 stays in [danpennic-sys/quantumguard](https://github.com/danpennic-sys/quantumguard). Do not merge these verdicts.
